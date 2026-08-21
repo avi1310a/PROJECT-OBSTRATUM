@@ -1,0 +1,16 @@
+STEP 1: Open Main.py and add your app location for launching app from AI through voice command 
+
+STEP 2: Copy the command line for cmd
+
+STEP 3: open cmd as administrator
+
+STEP 4: cd /d "<directory location>"
+
+STEP 5: paste command prompt given
+
+STEP 6: Run it and now an .exe file will be made on Main.py directory
+
+STEP 7: Your application is ready now you can run it tag it in taskbar and whatever you want! ENJOY!
+
+- ARNAV KHARE
+  (director PROJECT-OBSTRATUM)

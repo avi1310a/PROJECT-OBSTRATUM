@@ -1,0 +1,22 @@
+OBSTRATUM VERSION 3.0
+
+Known issue fixes:-
+
+1. .gitignore file added for relevance (You can delete this files as it is for server optimisation)
+
+2. Voice issued to primary 1 and code updated
+
+3. Voice os updated
+
+4. Made open source
+
+Code update:-
+
+1. Credentials added
+
+2. Voice modulation
+
+3. Welcome text added
+
+- ARNAV KHARE
+ (PROJECT_OBSTRATUM)

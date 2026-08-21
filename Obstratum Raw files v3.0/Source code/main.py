@@ -33,8 +33,9 @@ VERSION = "3.0"
 VOICE_RATE = 175
 VOICE_VOLUME = 1.0
 
-VOICE_RECORD_SECONDS = 6
+VOICE_RECORD_SECONDS = 4
 VOICE_SAMPLE_RATE = 16000
+MICROPHONE_DEVICE = 1
 
 
 # ============================================================
@@ -59,8 +60,6 @@ CUSTOM_APPS = {
 
     "edge": r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
 
-    "vscode": r"F:\Microsoft VS Code\Code.exe",
-
     "notepad": r"C:\Windows\System32\notepad.exe",
 
     "calculator": r"C:\Windows\System32\calc.exe",
@@ -76,7 +75,8 @@ CUSTOM_APPS = {
     # ---------------- GAMES ----------------
 
     # ---------------- APPS ----------------
-    
+ 
+
 }
 
 
@@ -696,30 +696,48 @@ def answer_question(command):
 
     text = command.lower().strip()
 
-    # Identity
+    # About Creator
 
     if (
-        "who are you" in text
-        or "what are you" in text
+        "who is your creater" in text
+        or "who is arnav" in text
+        or "who created you" in text
     ):
 
         return (
-            "I am OBSTRATUM, "
-            "your Python based Windows assistant."
+            "Arnav is a student with exceptional talent in AI and Robotics." 
+            " He is my creater." 
+            " I am one of his proud creations." 
+            " He is a student in class 9th."
+            "He wishes to become Robotic scientist."
+            " If you want to contact him here is the email."
+            "Avi1310a@gmail.com"
         )
+    # Identity
 
+    if (
+            "who are you" in text
+            or "what are you" in text
+        ):
+    
+            return (
+                "I am OBSTRATUM, "
+                "your Python based Windows assistant."
+                " Made by Arnav Khare"
+            )
+    
     if "your name" in text:
-
-        return (
-            "My name is OBSTRATUM."
-        )
-
+    
+            return (
+                "My name is OBSTRATUM."
+            )
+    
     if "who made you" in text:
-
-        return (
-            "I was created as the OBSTRATUM "
-            "Python project."
-        )
+    
+            return (
+                "I was created as the OBSTRATUM "
+                " by Arnav Khare"
+            )
 
     # Greetings
 
@@ -732,13 +750,13 @@ def answer_question(command):
     ]:
 
         return (
-            "Hello. OBSTRATUM is online."
+            "Hello. How can I help you."
         )
 
     if "how are you" in text:
 
         return (
-            "All systems are operational."
+            "All systems are operational and I am in good shape."
         )
 
     # Capabilities
@@ -1085,6 +1103,7 @@ def process_command(command):
 
     return (
         "I don't understand that command yet.\n"
+        "You may contact Avi1310a@gmail.com for help regarding this command and demand update request."
         "Type 'help' to see what I can do."
     )
 
@@ -1099,29 +1118,21 @@ recognizer = sr.Recognizer()
 def listen_for_voice():
 
     try:
+        update_status("🎙️ Listening... Speak now!")
 
-        update_status(
-            "🎙️ Listening..."
-        )
-
+        # Record from the selected microphone
         recording = sd.rec(
-            int(
-                VOICE_RECORD_SECONDS
-                * VOICE_SAMPLE_RATE
-            ),
+            int(VOICE_RECORD_SECONDS * VOICE_SAMPLE_RATE),
             samplerate=VOICE_SAMPLE_RATE,
             channels=1,
-            dtype="int16"
+            dtype="int16",
+            device=MICROPHONE_DEVICE
         )
 
+        # Wait until recording is completely finished
         sd.wait()
 
-        update_status(
-            "🧠 Processing voice..."
-        )
-
-        # Convert directly to SpeechRecognition AudioData.
-        # No PyAudio and no temporary WAV file required.
+        update_status("🧠 Converting speech to text...")
 
         audio_data = sr.AudioData(
             recording.tobytes(),
@@ -1129,6 +1140,7 @@ def listen_for_voice():
             2
         )
 
+        # Google Speech Recognition
         text = recognizer.recognize_google(
             audio_data
         )
@@ -1139,14 +1151,14 @@ def listen_for_voice():
 
         return (
             None,
-            "I couldn't understand the voice command."
+            "I heard you, but I couldn't understand the command."
         )
 
     except sr.RequestError:
 
         return (
             None,
-            "The speech recognition service is unavailable."
+            "Speech recognition couldn't connect to Google. Check your internet."
         )
 
     except Exception as error:
@@ -1159,37 +1171,52 @@ def listen_for_voice():
 
 def voice_command():
 
+    # Prevent multiple recordings
     if voice_button["state"] == tk.DISABLED:
-
         return
 
     voice_button.config(
-        state=tk.DISABLED
+        state=tk.DISABLED,
+        text="🎙️ LISTENING..."
+    )
+
+    update_status(
+        "🎙️ Listening... Speak now!"
     )
 
     def worker():
 
-        result = listen_for_voice()
+        try:
 
-        if isinstance(
-            result,
-            tuple
-        ):
+            result = listen_for_voice()
 
-            text, error = result
+            if isinstance(result, tuple):
 
-        else:
+                text, error = result
 
-            text = result
-            error = None
+            else:
 
-        root.after(
-            0,
-            lambda: finish_voice(
-                text,
-                error
+                text = result
+                error = None
+
+            # Return to GUI thread
+            root.after(
+                0,
+                lambda: finish_voice(
+                    text,
+                    error
+                )
             )
-        )
+
+        except Exception as error:
+
+            root.after(
+                0,
+                lambda: finish_voice(
+                    None,
+                    f"Voice system error: {error}"
+                )
+            )
 
     threading.Thread(
         target=worker,
@@ -1197,13 +1224,12 @@ def voice_command():
     ).start()
 
 
-def finish_voice(
-    text,
-    error
-):
+def finish_voice(text, error):
 
+    # ALWAYS restore the button
     voice_button.config(
-        state=tk.NORMAL
+        state=tk.NORMAL,
+        text="🎙️ VOICE"
     )
 
     if error:
@@ -1221,6 +1247,16 @@ def finish_voice(
 
     if text:
 
+        add_message(
+            "You",
+            text
+        )
+
+        update_status(
+            "⚙️ Processing command..."
+        )
+
+        # Process the recognized command
         handle_command(
             text
         )
@@ -1273,7 +1309,7 @@ header.pack(
 
 title = tk.Label(
     header,
-    text="OBSTRATUM",
+    text="OBSTRATUM 3.0",
     font=(
         "Segoe UI",
         27,
@@ -1290,7 +1326,7 @@ title.pack(
 
 subtitle = tk.Label(
     header,
-    text=f"Desktop AI Assistant  •  Version {VERSION}",
+    text=f"Desktop AI Partner  •  Version {VERSION}",
     font=(
         "Segoe UI",
         10
@@ -1510,7 +1546,7 @@ def typed_command(event=None):
 
 send_button = tk.Button(
     bottom,
-    text="SEND",
+    text="Enter",
     command=typed_command,
     font=(
         "Segoe UI",
@@ -1538,7 +1574,7 @@ send_button.pack(
 
 voice_button = tk.Button(
     bottom,
-    text="🎙️ VOICE",
+    text="🎙️ Audio",
     command=voice_command,
     font=(
         "Segoe UI",
@@ -1595,7 +1631,12 @@ input_box.bind(
 
 add_message(
     "OBSTRATUM",
-    "Systems online."
+    "Greetings"
+)
+
+add_message(
+    "OBSTRATUM",
+    "Ready to help!."
 )
 
 add_message(
